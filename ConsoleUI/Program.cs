@@ -12,6 +12,7 @@ namespace ConsoleUI
             //CarManagerTest();
             //ColorManagerTest();
             //BrandManagerTest();
+            //Kullanmadan önce veritabanını eklemeyi unutmayın!
             Console.ReadLine();
         }
 

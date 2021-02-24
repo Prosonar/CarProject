@@ -1,4 +1,6 @@
 ﻿using Business.Abstract.Services;
+using Core.Utilities.Results.Abstract;
+using Core.Utilities.Results.Concrete;
 using DataAccess.Abstract;
 using Entity.Concrete;
 using Entity.DTO;
@@ -19,53 +21,56 @@ namespace Business.Concrete.Managers
             _carDal = carDal;
         }
 
-        public void Add(Car car)
+        public IResult Add(Car car)
         {
             if(car.Name.Length<=1 || car.DailyPrice<=0)
             {
-                return;
+                return new ErrorResult("Validasyon hatası!");
             }
             _carDal.Add(car);
+            return new SuccessResult("Araba eklendi.");
         }
 
-        public void Delete(Car car)
+        public IResult Delete(Car car)
         {
             _carDal.Delete(car);
+            return new SuccessResult("Araba silindi.");
         }
 
-        public Car GetCarById(int carId)
+        public IDataResult<Car> GetCarById(int carId)
         {
-            return _carDal.GetById(c => c.Id == carId);
+            return new SuccessDataResult<Car>(_carDal.GetById(c => c.Id == carId),"Araba bulundu!");
         }
 
-        public List<Car> GetCars(Expression<Func<Car, bool>> filter = null)
+        public IDataResult<List<Car>> GetCars(Expression<Func<Car, bool>> filter = null)
         {
-            return _carDal.GetAll(filter);
+            return new SuccessDataResult<List<Car>>(_carDal.GetAll(filter),"Filtrelemeye uygun arabalar listelendi.");
         }
 
-        public List<Car> GetCarsByBrand(int brandId)
+        public IDataResult<List<Car>> GetCarsByBrand(int brandId)
         {
-            return _carDal.GetAll(c => c.BrandId == brandId);
+            return new SuccessDataResult<List<Car>>(_carDal.GetAll(c => c.BrandId == brandId),"Markaya göre arabalar listelendi.");
         }
 
-        public List<Car> GetCarsByColor(int colorId)
+        public IDataResult<List<Car>> GetCarsByColor(int colorId)
         {
-            return _carDal.GetAll(c => c.ColorId == colorId);
+            return new SuccessDataResult<List<Car>>(_carDal.GetAll(c => c.ColorId == colorId),"Renge göre arabalar listelendi.");
         }
 
-        public List<CarDetail> GetCarWithDetails()
+        public IDataResult<List<CarDetail>> GetCarWithDetails()
         {
             var result = _carDal.GetCarsWithDetails();
-            return result.ToList();
+            return new SuccessDataResult<List<CarDetail>>(result.ToList(),"Arabalar detaylarıyla beraber listelendi.");
         }
 
-        public void Update(Car car)
+        public IResult Update(Car car)
         {
             if (car.Name.Length <= 1 || car.DailyPrice <= 0)
             {
-                return;
+                return new ErrorResult("Validasyon hatası.");
             }
             _carDal.Update(car);
+            return new SuccessResult("Araba güncellendi.");
         }
     }
 }

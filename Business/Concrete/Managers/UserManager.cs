@@ -6,6 +6,7 @@ using DataAccess.Abstract;
 using Entity.Concrete;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 
@@ -14,10 +15,12 @@ namespace Business.Concrete.Managers
     public class UserManager : IUserService
     {
         private IUserDal _userDal;
+        private ICustomerService _customerService;
 
-        public UserManager(IUserDal userDal)
+        public UserManager(IUserDal userDal,ICustomerService customerService)
         {
             _userDal = userDal;
+            _customerService = customerService;
         }
 
         public IResult Add(User user)
@@ -37,6 +40,11 @@ namespace Business.Concrete.Managers
         {
             var result = ExceptionHandler.HandleWithNoReturn(() =>
             {
+                var listOfCustomers = _customerService.GetAll(c => c.UserId == user.Id).Data.Select(c => c.Id).ToList();
+                if(listOfCustomers.Count>0)
+                {
+                    throw new Exception("Bu kullanıcı aynı zamanda bir müşteri.Silme başarısız!");
+                }
                 _userDal.Delete(user);
             });
             if (!result)

@@ -11,49 +11,59 @@ namespace WebAPI.Controllers
 {
     [Route("api/[controller]/[action]")]
     [ApiController]
-    public class BrandController : ControllerBase
+    public class UserController : ControllerBase
     {
-        IBrandService _brandService;
+        IUserService _userService;
 
-        public BrandController(IBrandService brandService)
+        public UserController(IUserService userService)
         {
-            _brandService = brandService;
+            _userService = userService;
         }
 
-        [HttpGet]
+        [HttpGet("getall")]
         public IActionResult GetAll()
         {
-            var result = _brandService.GetBrands();
+            var result = _userService.GetAll();
             if (result.Success)
             {
                 return Ok(result);
             }
             return BadRequest(result.Message);
         }
-        [HttpPost]
-        public IActionResult Add(Brand color)
+        [HttpPost("add")]
+        public IActionResult Add(User user)
         {
-            var result = _brandService.Add(color);
+            var result = _userService.Add(user);
             if (result.Success)
             {
                 return Ok(result);
             }
             return BadRequest(result.Message);
         }
-        [HttpPost]
-        public IActionResult Delete(Brand color)
+        [HttpPost("delete")]
+        public IActionResult Delete(User user)
         {
-            var result = _brandService.Delete(color);
+            var result = _userService.Delete(user);
             if (result.Success)
             {
                 return Ok(result);
             }
             return BadRequest(result.Message);
         }
-        [HttpPost]
-        public IActionResult Update(Brand color)
+        [HttpPost("update")]
+        public IActionResult Update(User user)
         {
-            var result = _brandService.Update(color);
+            var result = _userService.Update(user);
+            if (result.Success)
+            {
+                return Ok(result);
+            }
+            return BadRequest(result.Message);
+        }
+        [HttpPost("getbyid")]
+        public IActionResult GetById(int userId)
+        {
+            var result = _userService.GetById(userId);
             if (result.Success)
             {
                 return Ok(result);

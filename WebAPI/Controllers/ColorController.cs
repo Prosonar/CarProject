@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace WebAPI.Controllers
 {
-    [Route("[controller]/[action]")]//route ayarları değişti.Meraktan yaptım.Action denen yere fonksiyonun ismi yazılırsa çalışır.
+    [Route("api/[controller]/[action]")]//route ayarları değişti.Meraktan yaptım.Action denen yere fonksiyonun ismi yazılırsa çalışır.
     [ApiController]
     public class ColorController : ControllerBase
     {

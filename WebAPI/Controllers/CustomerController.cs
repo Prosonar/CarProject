@@ -11,49 +11,59 @@ namespace WebAPI.Controllers
 {
     [Route("api/[controller]/[action]")]
     [ApiController]
-    public class BrandController : ControllerBase
+    public class CustomerController : ControllerBase
     {
-        IBrandService _brandService;
+        ICustomerService _customerService;
 
-        public BrandController(IBrandService brandService)
+        public CustomerController(ICustomerService customerService)
         {
-            _brandService = brandService;
+            _customerService = customerService;
         }
 
-        [HttpGet]
+        [HttpGet("getall")]
         public IActionResult GetAll()
         {
-            var result = _brandService.GetBrands();
+            var result = _customerService.GetAll();
             if (result.Success)
             {
                 return Ok(result);
             }
             return BadRequest(result.Message);
         }
-        [HttpPost]
-        public IActionResult Add(Brand color)
+        [HttpPost("add")]
+        public IActionResult Add(Customer customer)
         {
-            var result = _brandService.Add(color);
+            var result = _customerService.Add(customer);
             if (result.Success)
             {
                 return Ok(result);
             }
             return BadRequest(result.Message);
         }
-        [HttpPost]
-        public IActionResult Delete(Brand color)
+        [HttpPost("delete")]
+        public IActionResult Delete(Customer customer)
         {
-            var result = _brandService.Delete(color);
+            var result = _customerService.Delete(customer);
             if (result.Success)
             {
                 return Ok(result);
             }
             return BadRequest(result.Message);
         }
-        [HttpPost]
-        public IActionResult Update(Brand color)
+        [HttpPost("update")]
+        public IActionResult Update(Customer customer)
         {
-            var result = _brandService.Update(color);
+            var result = _customerService.Update(customer);
+            if (result.Success)
+            {
+                return Ok(result);
+            }
+            return BadRequest(result.Message);
+        }
+        [HttpPost("getbyid")]
+        public IActionResult GetById(int customerId)
+        {
+            var result = _customerService.GetById(customerId);
             if (result.Success)
             {
                 return Ok(result);

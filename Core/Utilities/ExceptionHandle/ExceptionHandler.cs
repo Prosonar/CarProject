@@ -47,5 +47,27 @@ namespace Core.Utilities.ExceptionHandle
                 return result;
             }
         }
+        /// <summary>
+        /// Parametresi olmayan ama geriye değer döndüren fonksiyonların hata kontrolünü yapar.
+        /// </summary>
+        /// <typeparam name="T">Çalışacak fonksiyonun geriye döndürdüğü veri tipi</typeparam>
+        /// <param name="action">Çalışacak olan fonksiyonun kendisi.</param>
+        /// <returns></returns>
+        public static ExceptionHandlerObject<T> HandleWithReturnNoParameter<T>(Func<T> action)
+        {
+            var result = new ExceptionHandlerObject<T>();
+            try
+            {
+                var data = action();
+                result.Data = data;
+                result.Success = true;
+                return result;
+            }
+            catch (Exception)
+            {
+                result.Success = false;
+                return result;
+            }
+        }
     }
 }

@@ -4,6 +4,7 @@ using Core.Utilities.Results.Abstract;
 using Core.Utilities.Results.Concrete;
 using DataAccess.Abstract;
 using Entity.Concrete;
+using Entity.DTO;
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
@@ -14,10 +15,12 @@ namespace Business.Concrete.Managers
     public class RentalManager : IRentalService
     {
         private IRentalDal _rentalDal;
+        private ICarService _carService;
 
-        public RentalManager(IRentalDal rentalDal)
+        public RentalManager(IRentalDal rentalDal,ICarService carService)
         {
             _rentalDal = rentalDal;
+            _carService = carService;
         }
 
         public IResult Add(Rental rental)
@@ -25,16 +28,23 @@ namespace Business.Concrete.Managers
             
             var result = ExceptionHandler.HandleWithNoReturn(() =>
             {
-                List<Rental> rentals = _rentalDal.GetAll(r => r.CarId == rental.CarId);
-                if (rentals.Count != 0)
+                Car car = _carService.GetCarById(rental.CarId).Data;
+                if(!car.IsAvailable)
                 {
-                    Rental rental2 = rentals[rentals.Count - 1];
-                    if (rental2.IsAvaible == false)
-                    {
-                        throw new Exception("Araba şuanda kiralanamaz!");
-                    }
+                    throw new Exception("Araba zaten kiralanmıştır.");
                 }
                 _rentalDal.Add(rental);
+                _carService.Update(new Car
+                {
+                    Id = car.Id,
+                    BrandId = car.BrandId,
+                    ColorId = car.ColorId,
+                    Name = car.Name,
+                    Description = car.Description,
+                    //ModelYear = car.ModelYear,
+                    DailyPrice = car.DailyPrice,
+                    IsAvailable = false
+                });
             });
             if (!result)
             {
@@ -58,9 +68,9 @@ namespace Business.Concrete.Managers
 
         public IDataResult<List<Rental>> GetAll(Expression<Func<Rental, bool>> filter = null)
         {
-            var result = ExceptionHandler.HandleWithReturn<Expression<Func<Rental, bool>>, List<Rental>>((userId) =>
+            var result = ExceptionHandler.HandleWithReturn<Expression<Func<Rental, bool>>, List<Rental>>((f) =>
             {
-                return _rentalDal.GetAll(filter);
+                return _rentalDal.GetAll(f);
             }, filter);
             if (!result.Success)
             {
@@ -69,9 +79,22 @@ namespace Business.Concrete.Managers
             return new SuccessDataResult<List<Rental>>(result.Data, "İşlem başarılı");
         }
 
+        public IDataResult<List<RentalDetail>> GetAllWithDetails(Expression<Func<Rental, bool>> filter = null)
+        {
+            var result = ExceptionHandler.HandleWithReturn<Expression<Func<Rental, bool>>, List<RentalDetail>>((f) =>
+            {
+                return _rentalDal.GetRentalWithDetail(f);
+            }, filter);
+            if (!result.Success)
+            {
+                return new ErrorDataResult<List<RentalDetail>>("Beklenmedik bir hata çıktı.Lütfen daha sonra tekrar deneyiniz.");
+            }
+            return new SuccessDataResult<List<RentalDetail>>(result.Data, "İşlem başarılı");
+        }
+
         public IDataResult<Rental> GetById(int rentalId)
         {
-            var result = ExceptionHandler.HandleWithReturn<int, Rental>((userId) =>
+            var result = ExceptionHandler.HandleWithReturn<int, Rental>((x) =>
             {
                 return _rentalDal.GetById(u => u.Id == rentalId);
             }, rentalId);
@@ -86,14 +109,25 @@ namespace Business.Concrete.Managers
         {
             var result = ExceptionHandler.HandleWithNoReturn(() =>
             {
+                Car car = _carService.GetCarById(rental.CarId).Data;
                 _rentalDal.Update(new Rental 
                 { 
                     Id = rental.Id, 
-                    IsAvaible = true ,
                     ReturnDate=DateTime.Now,
                     RentDate=rental.RentDate,
                     CarId=rental.CarId,
                     CustomerId=rental.CustomerId
+                });
+                _carService.Update(new Car
+                {
+                    Id = car.Id,
+                    BrandId = car.BrandId,
+                    ColorId = car.ColorId,
+                    Name = car.Name,
+                    Description = car.Description,
+                    //ModelYear = car.ModelYear,
+                    DailyPrice = car.DailyPrice,
+                    IsAvailable = true
                 });
             });
             if(!result)

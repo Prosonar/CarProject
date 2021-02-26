@@ -13,11 +13,12 @@ namespace DataAccess.Concrete.EntityFramework.EntityOperations
 {
     public class EfCarDal : EfEntityRepositoryBase<Car, CarProjectContext>, ICarDal
     {
-        public List<CarDetail> GetCarsWithDetails()
+        public List<CarDetail> GetCarsWithDetails(Expression<Func<Car,bool>> filter = null)
         {
+            var cars = this.GetAll(filter);
             using (CarProjectContext context = new CarProjectContext())
             {
-                var result = from c in context.Cars
+                var result = from c in cars
                              join b in context.Brands
                              on c.BrandId equals b.Id
                              join r in context.Colors

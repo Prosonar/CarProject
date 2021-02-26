@@ -10,7 +10,7 @@ namespace ConsoleUI
         static void Main(string[] args)
         {
             //CarManagerTest();
-            //ColorManagerTest();
+            ColorManagerTest();
             //BrandManagerTest();
             //UserManagerTest();
             //CustomerManagerTest();
@@ -20,13 +20,13 @@ namespace ConsoleUI
 
         private static void RentalManagerTest()
         {
-            RentalManager rentalManager = new RentalManager(new EfRentalDal());
-            rentalManager.Add(new Rental { CarId = 1, CustomerId = 1, RentDate = DateTime.Now, IsAvaible = false });
-            rentalManager.Add(new Rental { CarId = 2, CustomerId = 2, RentDate = DateTime.Now, IsAvaible = false });
-            var result = rentalManager.Add(new Rental { CarId = 1, CustomerId = 1, RentDate = DateTime.Now, IsAvaible = false });
+            RentalManager rentalManager = new RentalManager(new EfRentalDal(),new CarManager(new EfCarDal()));
+            rentalManager.Add(new Rental { CarId = 1, CustomerId = 1, RentDate = DateTime.Now });
+            rentalManager.Add(new Rental { CarId = 2, CustomerId = 2, RentDate = DateTime.Now});
+            var result = rentalManager.Add(new Rental { CarId = 1, CustomerId = 1, RentDate = DateTime.Now });
             var result2 = rentalManager.ReturnCar(rentalManager.GetById(2).Data);
             rentalManager.ReturnCar(rentalManager.GetById(4).Data);
-            var result3 = rentalManager.Add(new Rental { CarId = 2, CustomerId = 3, RentDate = DateTime.Now, IsAvaible = false });
+            var result3 = rentalManager.Add(new Rental { CarId = 2, CustomerId = 3, RentDate = DateTime.Now });
             Console.WriteLine(result3.Message);
         }
 
@@ -46,7 +46,7 @@ namespace ConsoleUI
 
         private static void UserManagerTest()
         {
-            UserManager userManager = new UserManager(new EfUserDal());
+            UserManager userManager = new UserManager(new EfUserDal(),new CustomerManager(new EfCustomerDal()));
             //userManager.Add(new User { FirstName = "Ali", LastName = "Veli", Email = "asdasd@gmail.com", Password = "ASDASDASD" });
             //userManager.Add(new User { FirstName = "Ali2", LastName = "Veli2", Email = "2asdasd@gmail.com", Password = "ASDASDASD" });
             //userManager.Add(new User { FirstName = "Ali3", LastName = "Veli3", Email = "3asdasd@gmail.com", Password = "ASDASDASD" });
@@ -62,7 +62,7 @@ namespace ConsoleUI
 
         private static void BrandManagerTest()
         {
-            BrandManager brandManager = new BrandManager(new EfBrandDal());
+            BrandManager brandManager = new BrandManager(new EfBrandDal(),new CarManager(new EfCarDal()));
             brandManager.Add(new Brand { Name = "Mercedes" });
             brandManager.Add(new Brand { Name = "Ford" });
             brandManager.Add(new Brand { Name = "BMW" });
@@ -76,28 +76,30 @@ namespace ConsoleUI
 
         private static void ColorManagerTest()
         {
-            ColorManager colorManager = new ColorManager(new EfColorDal());
-            colorManager.Add(new Color { Name = "Mavi" });
-            colorManager.Add(new Color { Name = "Siyah" });
-            colorManager.Add(new Color { Name = "Kırmızı" });
-            colorManager.Add(new Color { Name = "Beyaz" });
-            //foreach (var color in colorManager.GetColors())
-            //{
-            //    Console.WriteLine(color.Name);
-            //}
+            ColorManager colorManager = new ColorManager(new EfColorDal(),new CarManager(new EfCarDal()));
+            Console.WriteLine(colorManager.Delete(new Color { Id = 1005 }).Message);
+            //colorManager.Add(new Color { Name = "Turuncu" });
+            //colorManager.Add(new Color { Name = "Yeşil" });
+            //colorManager.Add(new Color { Name = "Kahverengi" });
+            //colorManager.Add(new Color { Name = "Mor" });
+            //Console.WriteLine(colorManager.Add(new Color()).Message);//hata veriyor normalde ama merkezi hata kontrolü ile sıkıntı çıkmıyor.deneme amaçlı kullanıldı.
+            foreach (var color in colorManager.GetColors().Data)
+            {
+                Console.WriteLine(color.Name);
+            }
         }
 
         private static void CarManagerTest()
         {
             CarManager carManager = new CarManager(new EfCarDal());
-            carManager.Add(new Car { ColorId = 1, BrandId = 1, Name = "Araba1", DailyPrice = 250 });
-            carManager.Add(new Car { ColorId = 2, BrandId = 2, Name = "Araba2", DailyPrice = 200 });
-            carManager.Add(new Car { ColorId = 3, BrandId = 3, Name = "Araba3", DailyPrice = 300 });
-            carManager.Add(new Car { ColorId = 4, BrandId = 4, Name = "Araba4", DailyPrice = 225 });
-            //foreach (var car in carManager.GetCarWithDetails())
-            //{
-            //    Console.WriteLine("{0} | {1} | {2} ", car.CarName, car.BrandName, car.ColorName);
-            //}
+            carManager.Add(new Car { ColorId = 1, BrandId = 1, Name = "Araba5", DailyPrice = 150,IsAvailable=true });
+            //carManager.Add(new Car { ColorId = 2, BrandId = 2, Name = "Araba2", DailyPrice = 200 });
+            //carManager.Add(new Car { ColorId = 3, BrandId = 3, Name = "Araba3", DailyPrice = 300 });
+            //carManager.Add(new Car { ColorId = 4, BrandId = 4, Name = "Araba4", DailyPrice = 225 });
+            foreach (var car in carManager.GetCars().Data)
+            {
+                Console.WriteLine("{0} ", car.Name);
+            }
         }
     }
 }

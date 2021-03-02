@@ -1,9 +1,6 @@
-﻿using Entity.Concrete;
+﻿using Core.Entity.Concrete;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace DataAccess.Concrete.EntityFramework.Mappings
 {
@@ -18,7 +15,10 @@ namespace DataAccess.Concrete.EntityFramework.Mappings
             builder.Property(u => u.FirstName).HasColumnName("FirstName");
             builder.Property(u => u.LastName).HasColumnName("LastName");
             builder.Property(u => u.Email).HasColumnName("Email");
-            builder.Property(u => u.Password).HasColumnName("Password");
+            builder.Property(u => u.PasswordHash).HasColumnName("PasswordHash");
+            builder.Property(u => u.PasswordSalt).HasColumnName("PasswordSalt");
+            builder.Property(u => u.IsActive).HasColumnName("IsActive");
+
         }
     }
 }

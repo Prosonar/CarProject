@@ -1,5 +1,6 @@
 ﻿using Business.Abstract.Services;
 using Entity.Concrete;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -9,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace WebAPI.Controllers
 {
-    [Route("api/[controller]/[action]")]
+    [Route("api/[controller]")]
     [ApiController]
     public class BrandController : ControllerBase
     {
@@ -20,7 +21,8 @@ namespace WebAPI.Controllers
             _brandService = brandService;
         }
 
-        [HttpGet]
+        [HttpGet("getall")]
+        [Authorize()]
         public IActionResult GetAll()
         {
             var result = _brandService.GetBrands();

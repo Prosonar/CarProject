@@ -1,6 +1,7 @@
 ﻿using Autofac;
 using Business.Abstract.Services;
 using Business.Concrete.Managers;
+using Core.Utilities.Security.JWT;
 using DataAccess.Abstract;
 using DataAccess.Concrete.EntityFramework.EntityOperations;
 using System;
@@ -19,6 +20,8 @@ namespace Business.DependencyResolver.Autofac
             builder.RegisterType<RentalManager>().As<IRentalService>().SingleInstance();
             builder.RegisterType<ColorManager>().As<IColorService>().SingleInstance();
             builder.RegisterType<BrandManager>().As<IBrandService>().SingleInstance();
+            builder.RegisterType<CarImageManager>().As<ICarImageService>().SingleInstance();
+            builder.RegisterType<AuthorizationManager>().As<IAuthorizationService>().SingleInstance();
 
             builder.RegisterType<EfCarDal>().As<ICarDal>().SingleInstance();
             builder.RegisterType<EfCustomerDal>().As<ICustomerDal>().SingleInstance();
@@ -26,6 +29,8 @@ namespace Business.DependencyResolver.Autofac
             builder.RegisterType<EfRentalDal>().As<IRentalDal>().SingleInstance();
             builder.RegisterType<EfColorDal>().As<IColorDal>().SingleInstance();
             builder.RegisterType<EfBrandDal>().As<IBrandDal>().SingleInstance();
+            builder.RegisterType<EfCarImageDal>().As<ICarImageDal>().SingleInstance();
+            builder.RegisterType<JWTHelper>().As<ITokenHelper>().SingleInstance();
         }
     }
 }

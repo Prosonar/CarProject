@@ -1,4 +1,5 @@
-﻿using DataAccess.Concrete.EntityFramework.Mappings;
+﻿using Core.Entity.Concrete;
+using DataAccess.Concrete.EntityFramework.Mappings;
 using Entity.Concrete;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -14,7 +15,10 @@ namespace DataAccess.Concrete.EntityFramework.Contexts
         public DbSet<Car> Cars { get; set; }
         public DbSet<Customer> Customers { get; set; }
         public DbSet<User> Users { get; set; }
+        public DbSet<UserOperationClaim> UserOperationClaims { get; set; }
+        public DbSet<OperationClaim> OperationClaims { get; set; }
         public DbSet<Rental> Rentals { get; set; }
+        public DbSet<CarImage> CarImages { get; set; }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.UseSqlServer("Data Source=(localdb)\\MSSQLLocalDB;initial catalog=CarProject;integrated security=true");
@@ -28,6 +32,9 @@ namespace DataAccess.Concrete.EntityFramework.Contexts
             modelBuilder.ApplyConfiguration(new CustomerMapping());
             modelBuilder.ApplyConfiguration(new RentalMapping());
             modelBuilder.ApplyConfiguration(new UserMapping());
+            modelBuilder.ApplyConfiguration(new CarImageMapping());
+            modelBuilder.ApplyConfiguration(new UserOperationClaimMapping());
+            modelBuilder.ApplyConfiguration(new OperationClaimMapping());
         }
     }
 

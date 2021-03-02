@@ -1,4 +1,5 @@
 ﻿using Business.Abstract.Services;
+using Core.Entity.Concrete;
 using Core.Utilities.ExceptionHandle;
 using Core.Utilities.Results.Abstract;
 using Core.Utilities.Results.Concrete;
@@ -25,14 +26,15 @@ namespace Business.Concrete.Managers
 
         public IResult Add(User user)
         {
-            var result = ExceptionHandler.HandleWithNoReturn(() => 
-            {
-                _userDal.Add(user);
-            });
-            if(!result)
-            {
-                return new ErrorResult("Beklenmedik bir hata çıktı.Lütfen daha sonra tekrar deneyiniz.");
-            }
+            _userDal.Add(user);
+            //var result = ExceptionHandler.HandleWithNoReturn(() => 
+            //{
+            //    _userDal.Add(user);
+            //});
+            //if(!result)
+            //{
+            //    return new ErrorResult("Beklenmedik bir hata çıktı.Lütfen daha sonra tekrar deneyiniz.");
+            //}
             return new SuccessResult("İşlem başarılı");
         }
 
@@ -67,6 +69,19 @@ namespace Business.Concrete.Managers
             return new SuccessDataResult<List<User>>(result.Data, "İşlem başarılı");
         }
 
+        public IDataResult<User> GetByEmail(string email)
+        {
+            var result = ExceptionHandler.HandleWithReturn<string, User>((e) =>
+            {
+                return _userDal.GetAll(u => u.Email == e)[0];
+            }, email);
+            if (!result.Success)
+            {
+                return new ErrorDataResult<User>("Beklenmedik bir hata çıktı.Lütfen daha sonra tekrar deneyiniz.asdasdasdasd");
+            }
+            return new SuccessDataResult<User>(result.Data, "İşlem başarılı");
+        }
+
         public IDataResult<User> GetById(int userId)
         {
             var result = ExceptionHandler.HandleWithReturn<int,User>((userId) =>
@@ -78,6 +93,19 @@ namespace Business.Concrete.Managers
                 return new ErrorDataResult<User>("Beklenmedik bir hata çıktı.Lütfen daha sonra tekrar deneyiniz.");
             }
             return new SuccessDataResult<User>(result.Data,"İşlem başarılı");
+        }
+
+        public IDataResult<List<OperationClaim>> GetClaims(User user)
+        {
+            var result = ExceptionHandler.HandleWithReturn<User, List<OperationClaim>>((u) =>
+            {
+                return _userDal.GetClaims(u);
+            }, user);
+            if (!result.Success)
+            {
+                return new ErrorDataResult<List<OperationClaim>>("Beklenmedik bir hata çıktı.Lütfen daha sonra tekrar deneyiniz.");
+            }
+            return new SuccessDataResult<List<OperationClaim>>(result.Data, "İşlem başarılı");
         }
 
         public IResult Update(User user)

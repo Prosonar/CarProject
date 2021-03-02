@@ -1,5 +1,8 @@
 ﻿using Business.Abstract.Services;
+using Core.Entity.Concrete;
+using Core.Utilities.Security.Hashing;
 using Entity.Concrete;
+using Entity.DTO;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -9,66 +12,46 @@ using System.Threading.Tasks;
 
 namespace WebAPI.Controllers
 {
-    [Route("api/[controller]/[action]")]
+    [Route("api/[controller]")]
     [ApiController]
     public class UserController : ControllerBase
     {
-        IUserService _userService;
+        private IAuthorizationService _authorizationService;
 
-        public UserController(IUserService userService)
+        public UserController(IAuthorizationService authorizationService)
         {
-            _userService = userService;
+            _authorizationService = authorizationService;
         }
 
-        [HttpGet("getall")]
-        public IActionResult GetAll()
+        [HttpPost("register")]
+        public IActionResult Register(UserForRegister userForRegister)
         {
-            var result = _userService.GetAll();
-            if (result.Success)
+            var userToRegister = _authorizationService.Register(userForRegister);
+            if(!userToRegister.Success)
             {
-                return Ok(result);
+                return BadRequest(userToRegister.Message);
             }
-            return BadRequest(result.Message);
+            var accessToken = _authorizationService.CreateAccessToken(userToRegister.Data);
+            if(accessToken.Success)
+            {
+                return Ok(accessToken.Data);
+            }
+            return BadRequest("Token üretilemedi.");
         }
-        [HttpPost("add")]
-        public IActionResult Add(User user)
+        [HttpPost("login")]
+        public IActionResult Login(UserForLogin userForLogin)
         {
-            var result = _userService.Add(user);
-            if (result.Success)
+            var userToLogin = _authorizationService.Login(userForLogin);
+            if(!userToLogin.Success)
             {
-                return Ok(result);
+                return BadRequest(userToLogin.Message);
             }
-            return BadRequest(result.Message);
-        }
-        [HttpPost("delete")]
-        public IActionResult Delete(User user)
-        {
-            var result = _userService.Delete(user);
-            if (result.Success)
+            var accessToken = _authorizationService.CreateAccessToken(userToLogin.Data);
+            if(accessToken.Success)
             {
-                return Ok(result);
+                return Ok(accessToken.Data);
             }
-            return BadRequest(result.Message);
-        }
-        [HttpPost("update")]
-        public IActionResult Update(User user)
-        {
-            var result = _userService.Update(user);
-            if (result.Success)
-            {
-                return Ok(result);
-            }
-            return BadRequest(result.Message);
-        }
-        [HttpPost("getbyid")]
-        public IActionResult GetById(int userId)
-        {
-            var result = _userService.GetById(userId);
-            if (result.Success)
-            {
-                return Ok(result);
-            }
-            return BadRequest(result.Message);
+            return BadRequest("Token üretilemedi.");
         }
     }
 }

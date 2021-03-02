@@ -1,4 +1,5 @@
 ﻿using Business.Concrete.Managers;
+using Core.Entity.Concrete;
 using DataAccess.Concrete.EntityFramework.EntityOperations;
 using Entity.Concrete;
 using System;

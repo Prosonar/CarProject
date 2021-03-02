@@ -59,8 +59,8 @@ namespace Business.Concrete.Managers
             var result = ExceptionHandler.HandleWithReturn<Expression<Func<Brand, bool>>, List<Brand>>((f) =>
             {
                 return _brandDal.GetAll(f);
-            },filter);
-            if(!result.Success)
+            }, filter);
+            if (!result.Success)
             {
                 return new ErrorDataResult<List<Brand>>("Beklenmedik bir hata çıktı.Lütfen daha sonra tekrar deneyiniz.");
             }

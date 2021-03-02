@@ -1,5 +1,6 @@
 ﻿using Business.Abstract.Services;
 using Entity.Concrete;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -9,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace WebAPI.Controllers
 {
-    [Route("api/[controller]/[action]")]//route ayarları değişti.Meraktan yaptım.Action denen yere fonksiyonun ismi yazılırsa çalışır.
+    [Route("api/[controller]")]//route ayarları değişti.Meraktan yaptım.Action denen yere fonksiyonun ismi yazılırsa çalışır.
     [ApiController]
     public class ColorController : ControllerBase
     {
@@ -18,7 +19,8 @@ namespace WebAPI.Controllers
         {
             _colorService = colorService;
         }
-        [HttpGet]
+        [HttpGet("getall")]
+        [Authorize()]
         public IActionResult GetAll()
         {
             var result = _colorService.GetColors();

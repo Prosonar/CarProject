@@ -1,4 +1,5 @@
 ﻿using Business.Abstract.Services;
+using Business.Utilities.Messages.TurkishMessages;
 using Core.Entity.Concrete;
 using Core.Utilities.Results.Abstract;
 using Core.Utilities.Results.Concrete;
@@ -26,7 +27,7 @@ namespace Business.Concrete.Managers
         {
             var claims = _userService.GetClaims(user);
             var accessToken = _tokenHelper.CreateToken(user, claims.Data);
-            return new SuccessDataResult<AccessToken>(accessToken, "Access token oluşturuldu.");
+            return new SuccessDataResult<AccessToken>(accessToken,Messages.TokenCreated);
         }
 
         public IDataResult<User> Login(UserForLogin userForLogin)
@@ -34,22 +35,22 @@ namespace Business.Concrete.Managers
             var userToLogin = _userService.GetByEmail(userForLogin.Email);
             if(userToLogin == null)
             {
-                return new ErrorDataResult<User>("Kullanıcı bulunmadı");
+                return new ErrorDataResult<User>(Messages.UserNotFound);
             }
 
             if(!HashingHelper.VerifyPasswordHash(userForLogin.Password,userToLogin.Data.PasswordHash,userToLogin.Data.PasswordSalt))
             {
-                return new ErrorDataResult<User>("Kullanıcı bilgileri yanlış.");
+                return new ErrorDataResult<User>(Messages.WrongData);
             }
 
-            return new SuccessDataResult<User>(userToLogin.Data,"Giriş başarılı");
+            return new SuccessDataResult<User>(userToLogin.Data,Messages.SuccessMessage);
         }
 
         public IDataResult<User> Register(UserForRegister userForRegister)
         {
             if(UserExists(userForRegister.Email).Success)
             {
-                return new ErrorDataResult<User>("Kullanıcı zaten mevcut.");
+                return new ErrorDataResult<User>(Messages.UserAlreadyExist);
             }
             byte[] passwordHash, passwordSalt;
             HashingHelper.CreatePasswordHash(userForRegister.Password,out passwordHash,out passwordSalt);
@@ -64,9 +65,9 @@ namespace Business.Concrete.Managers
             };
             if(!_userService.Add(user).Success)
             {
-                return new ErrorDataResult<User>("Hata var.");
+                return new ErrorDataResult<User>(Messages.ErrorMessage);
             }
-            return new SuccessDataResult<User>(user, "Kullanıcı sisteme kaydedildi.");
+            return new SuccessDataResult<User>(user, Messages.SuccessMessage);
         }
 
         public IResult UserExists(string email)
@@ -74,9 +75,9 @@ namespace Business.Concrete.Managers
             var user = _userService.GetByEmail(email);
             if(user.Data == null)
             {
-                return new ErrorResult("Kullanıcı kayıt olabilir.");
+                return new ErrorResult(Messages.EmailAvailable);
             }
-            return new SuccessResult("Kullanıcı mevcut");
+            return new SuccessResult(Messages.UserAlreadyExist);
         }
     }
 }

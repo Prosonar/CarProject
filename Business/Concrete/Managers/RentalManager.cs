@@ -1,4 +1,9 @@
 ﻿using Business.Abstract.Services;
+using Business.BusinessAspects.Autofac;
+using Business.Utilities.Messages.TurkishMessages;
+using Business.ValidationRules.FluentValidation;
+using Core.Aspects.Autofac.Caching;
+using Core.Aspects.Autofac.Validation;
 using Core.Utilities.ExceptionHandle;
 using Core.Utilities.Results.Abstract;
 using Core.Utilities.Results.Concrete;
@@ -23,6 +28,9 @@ namespace Business.Concrete.Managers
             _carService = carService;
         }
 
+        [ValidationAspect(typeof(OperationClaimValidator), Priority = 4)]
+        [AuthAspect("admin",Priority = 5)]
+        [CacheRemoveAspect("IRentalService.Get", Priority = 3)]
         public IResult Add(Rental rental)
         {
             
@@ -31,7 +39,7 @@ namespace Business.Concrete.Managers
                 Car car = _carService.GetCarById(rental.CarId).Data;
                 if(!car.IsAvailable)
                 {
-                    throw new Exception("Araba zaten kiralanmıştır.");
+                    throw new Exception(Messages.CarNotAvaiblable);
                 }
                 _rentalDal.Add(rental);
                 _carService.Update(new Car
@@ -48,11 +56,12 @@ namespace Business.Concrete.Managers
             });
             if (!result)
             {
-                return new ErrorResult("Beklenmedik bir hata çıktı.Lütfen daha sonra tekrar deneyiniz.");
+                return new ErrorResult(Messages.ErrorMessage);
             }
-            return new SuccessResult("İşlem başarılı");
+            return new SuccessResult(Messages.SuccessMessage);
         }
-
+        [AuthAspect("admin",Priority = 5)]
+        [CacheRemoveAspect("IRentalService.Get", Priority = 3)]
         public IResult Delete(Rental rental)
         {
             var result = ExceptionHandler.HandleWithNoReturn(() =>
@@ -61,11 +70,12 @@ namespace Business.Concrete.Managers
             });
             if (!result)
             {
-                return new ErrorResult("Beklenmedik bir hata çıktı.Lütfen daha sonra tekrar deneyiniz.");
+                return new ErrorResult(Messages.ErrorMessage);
             }
-            return new SuccessResult("İşlem başarılı");
+            return new SuccessResult(Messages.SuccessMessage);
         }
-
+        [AuthAspect("admin",Priority = 5)]
+        [CacheAspect]
         public IDataResult<List<Rental>> GetAll(Expression<Func<Rental, bool>> filter = null)
         {
             var result = ExceptionHandler.HandleWithReturn<Expression<Func<Rental, bool>>, List<Rental>>((f) =>
@@ -74,11 +84,12 @@ namespace Business.Concrete.Managers
             }, filter);
             if (!result.Success)
             {
-                return new ErrorDataResult<List<Rental>>("Beklenmedik bir hata çıktı.Lütfen daha sonra tekrar deneyiniz.");
+                return new ErrorDataResult<List<Rental>>(Messages.ErrorMessage);
             }
-            return new SuccessDataResult<List<Rental>>(result.Data, "İşlem başarılı");
+            return new SuccessDataResult<List<Rental>>(result.Data, Messages.SuccessMessage);
         }
-
+        [AuthAspect("admin",Priority = 5)]
+        [CacheAspect]
         public IDataResult<List<RentalDetail>> GetAllWithDetails(Expression<Func<Rental, bool>> filter = null)
         {
             var result = ExceptionHandler.HandleWithReturn<Expression<Func<Rental, bool>>, List<RentalDetail>>((f) =>
@@ -87,11 +98,12 @@ namespace Business.Concrete.Managers
             }, filter);
             if (!result.Success)
             {
-                return new ErrorDataResult<List<RentalDetail>>("Beklenmedik bir hata çıktı.Lütfen daha sonra tekrar deneyiniz.");
+                return new ErrorDataResult<List<RentalDetail>>(Messages.ErrorMessage);
             }
-            return new SuccessDataResult<List<RentalDetail>>(result.Data, "İşlem başarılı");
+            return new SuccessDataResult<List<RentalDetail>>(result.Data, Messages.SuccessMessage);
         }
-
+        [AuthAspect("admin",Priority = 5)]
+        [CacheAspect]
         public IDataResult<Rental> GetById(int rentalId)
         {
             var result = ExceptionHandler.HandleWithReturn<int, Rental>((x) =>
@@ -100,11 +112,11 @@ namespace Business.Concrete.Managers
             }, rentalId);
             if (!result.Success)
             {
-                return new ErrorDataResult<Rental>("Beklenmedik bir hata çıktı.Lütfen daha sonra tekrar deneyiniz.");
+                return new ErrorDataResult<Rental>(Messages.ErrorMessage);
             }
-            return new SuccessDataResult<Rental>(result.Data, "İşlem başarılı");
+            return new SuccessDataResult<Rental>(result.Data, Messages.SuccessMessage);
         }
-
+        [AuthAspect("admin",Priority = 5)]
         public IResult ReturnCar(Rental rental)
         {
             var result = ExceptionHandler.HandleWithNoReturn(() =>
@@ -132,11 +144,14 @@ namespace Business.Concrete.Managers
             });
             if(!result)
             {
-                return new ErrorResult("Beklenmedik bir hata çıktı.Lütfen daha sonra deneyiniz.");
+                return new ErrorResult(Messages.ErrorMessage);
             }
-            return new SuccessResult("İşlem başarılı.");
+            return new SuccessResult(Messages.SuccessMessage);
         }
 
+        [ValidationAspect(typeof(OperationClaimValidator), Priority = 4)]
+        [AuthAspect("admin",Priority = 5)]
+        [CacheRemoveAspect("IRentalService.Get", Priority = 3)]
         public IResult Update(Rental rental)
         {
             var result = ExceptionHandler.HandleWithNoReturn(() =>
@@ -145,9 +160,9 @@ namespace Business.Concrete.Managers
             });
             if (!result)
             {
-                return new ErrorResult("Beklenmedik bir hata çıktı.Lütfen daha sonra tekrar deneyiniz.");
+                return new ErrorResult(Messages.ErrorMessage);
             }
-            return new SuccessResult("İşlem başarılı");
+            return new SuccessResult(Messages.SuccessMessage);
         }
     }
 }

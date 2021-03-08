@@ -1,4 +1,9 @@
 ﻿using Business.Abstract.Services;
+using Business.BusinessAspects.Autofac;
+using Business.Utilities.Messages.TurkishMessages;
+using Business.ValidationRules.FluentValidation;
+using Core.Aspects.Autofac.Caching;
+using Core.Aspects.Autofac.Validation;
 using Core.Entity.Concrete;
 using Core.Utilities.ExceptionHandle;
 using Core.Utilities.Results.Abstract;
@@ -18,6 +23,10 @@ namespace Business.Concrete.Managers
         {
             _userOperationClaimDal = userOperationClaimDal;
         }
+
+        [ValidationAspect(typeof(UserOperationClaimValidator), Priority = 4)]
+        [AuthAspect("admin",Priority = 5)]
+        [CacheRemoveAspect("IUserOperationClaimService.Get", Priority = 3)]
         public IResult Add(UserOperationClaim userOperationClaim)
         {
             var result = ExceptionHandler.HandleWithNoReturn(() =>
@@ -26,11 +35,12 @@ namespace Business.Concrete.Managers
             });
             if(result)
             {
-                return new ErrorResult("Beklenmedik bir hata oluştu.Lütfen daha sonra tekrar deneyiniz.");
+                return new ErrorResult(Messages.ErrorMessage);
             }
-            return new SuccessResult("İşlem başarılı");
+            return new SuccessResult(Messages.SuccessMessage);
         }
-
+        [AuthAspect("admin",Priority = 5)]
+        [CacheAspect]
         public IDataResult<List<UserOperationClaim>> GetAll(Expression<Func<UserOperationClaim, bool>> filter = null)
         {
             var result = ExceptionHandler.HandleWithReturn<Expression<Func<UserOperationClaim,bool>>,List<UserOperationClaim>>((f) =>
@@ -39,9 +49,9 @@ namespace Business.Concrete.Managers
             },filter);
             if (!result.Success)
             {
-                return new ErrorDataResult<List<UserOperationClaim>>("Beklenmedik bir hata oluştu.Lütfen daha sonra tekrar deneyiniz.");
+                return new ErrorDataResult<List<UserOperationClaim>>(Messages.ErrorMessage);
             }
-            return new SuccessDataResult<List<UserOperationClaim>>(result.Data,"İşlem başarılı");
+            return new SuccessDataResult<List<UserOperationClaim>>(result.Data, Messages.SuccessMessage);
         }
     }
 }

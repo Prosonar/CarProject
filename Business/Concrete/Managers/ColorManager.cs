@@ -1,4 +1,9 @@
 ﻿using Business.Abstract.Services;
+using Business.BusinessAspects.Autofac;
+using Business.Utilities.Messages.TurkishMessages;
+using Business.ValidationRules.FluentValidation;
+using Core.Aspects.Autofac.Caching;
+using Core.Aspects.Autofac.Validation;
 using Core.Utilities.ExceptionHandle;
 using Core.Utilities.Results.Abstract;
 using Core.Utilities.Results.Concrete;
@@ -23,6 +28,9 @@ namespace Business.Concrete.Managers
             _carService = carService;
         }
 
+        [ValidationAspect(typeof(ColorValidator),Priority = 4)]
+        [AuthAspect("admin",Priority = 5)]
+        [CacheRemoveAspect("IColorService.Get", Priority = 3)]
         public IResult Add(Color color)
         {
             var result = ExceptionHandler.HandleWithNoReturn(() =>
@@ -31,11 +39,12 @@ namespace Business.Concrete.Managers
             });
             if(!result)
             {
-                return new ErrorResult("Beklenmedik bir hata çıktı.Lütfen daha sonra tekrar deneyiniz.");
+                return new ErrorResult(Messages.ErrorMessage);
             }
-            return new SuccessResult("Renk eklendi!");
+            return new SuccessResult(Messages.SuccessMessage);
         }
-
+        [AuthAspect("admin",Priority = 5)]
+        [CacheRemoveAspect("IColorService.Get", Priority = 3)]
         public IResult Delete(Color color)
         {
             
@@ -44,17 +53,18 @@ namespace Business.Concrete.Managers
                 var listOfCar = _carService.GetCars(c => c.ColorId == color.Id).Data.ToList();
                 if (listOfCar.Count > 0)
                 {
-                    throw new Exception("Bu renk bir arabanın rengi olduğundan silinemez.");
+                    throw new Exception(Messages.ForeignKeyMessage);
                 }
                 _colorDal.Delete(color);
             });
             if (!result)
             {
-                return new ErrorResult("Beklenmedik bir hata çıktı.Lütfen daha sonra tekrar deneyiniz.");
+                return new ErrorResult(Messages.ErrorMessage);
             }
-            return new SuccessResult("Renk silindi!");
+            return new SuccessResult(Messages.SuccessMessage);
         }
-
+        [AuthAspect("admin",Priority = 5)]
+        [CacheAspect]
         public IDataResult<Color> GetById(int colorId)
         {
             var result = ExceptionHandler.HandleWithReturn<int, Color>((x) =>
@@ -63,11 +73,13 @@ namespace Business.Concrete.Managers
             },colorId);
             if(!result.Success)
             {
-                return new ErrorDataResult<Color>("Beklenmedik bir hata çıktı.Lütfen daha sonra tekrar deneyiniz.");
+                return new ErrorDataResult<Color>(Messages.ErrorMessage);
             }
-            return new SuccessDataResult<Color>(_colorDal.GetById(c => c.Id == colorId),"Renk bulundu.");
+            return new SuccessDataResult<Color>(_colorDal.GetById(c => c.Id == colorId), Messages.SuccessMessage);
         }
 
+        [AuthAspect("admin",Priority = 5)]
+        [CacheAspect]
         public IDataResult<List<Color>> GetColors(Expression<Func<Color, bool>> filter = null)
         {
             var result = ExceptionHandler.HandleWithReturn<Expression<Func<Color, bool>>, List<Color>>((f) =>
@@ -76,11 +88,14 @@ namespace Business.Concrete.Managers
             },filter);
             if(!result.Success)
             {
-                return new ErrorDataResult<List<Color>>("Beklenmedik bir hata çıktı.Lütfen daha sonra tekrar deneyiniz.");
+                return new ErrorDataResult<List<Color>>(Messages.ErrorMessage);
             }
-            return new SuccessDataResult<List<Color>>(_colorDal.GetAll(filter),"Renkler listelendi.");
+            return new SuccessDataResult<List<Color>>(_colorDal.GetAll(filter), Messages.SuccessMessage);
         }
 
+        [ValidationAspect(typeof(ColorValidator), Priority = 4)]
+        [AuthAspect("admin",Priority = 5)]
+        [CacheRemoveAspect("IColorService.Get", Priority = 3)]
         public IResult Update(Color color)
         {
             var result = ExceptionHandler.HandleWithNoReturn(() =>
@@ -89,9 +104,9 @@ namespace Business.Concrete.Managers
             });
             if (!result)
             {
-                return new ErrorResult("Beklenmedik bir hata çıktı.Lütfen daha sonra tekrar deneyiniz.");
+                return new ErrorResult(Messages.ErrorMessage);
             }
-            return new SuccessResult("Renk güncellendi!");
+            return new SuccessResult(Messages.SuccessMessage);
         }
     }
 }

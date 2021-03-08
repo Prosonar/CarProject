@@ -78,7 +78,7 @@ namespace ConsoleUI
         private static void ColorManagerTest()
         {
             ColorManager colorManager = new ColorManager(new EfColorDal(),new CarManager(new EfCarDal()));
-            Console.WriteLine(colorManager.Delete(new Color { Id = 1005 }).Message);
+            Console.WriteLine(colorManager.Add(new Color { Name = "" }).Message);
             //colorManager.Add(new Color { Name = "Turuncu" });
             //colorManager.Add(new Color { Name = "Yeşil" });
             //colorManager.Add(new Color { Name = "Kahverengi" });

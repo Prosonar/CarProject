@@ -22,7 +22,7 @@ namespace WebAPI.Controllers
         }
 
         [HttpGet("getall")]
-        [Authorize()]
+        [Authorize(Roles ="Admin")]
         public IActionResult GetAll()
         {
             var result = _brandService.GetBrands();

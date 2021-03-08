@@ -1,4 +1,9 @@
 ﻿using Business.Abstract.Services;
+using Business.BusinessAspects.Autofac;
+using Business.Utilities.Messages.TurkishMessages;
+using Business.ValidationRules.FluentValidation;
+using Core.Aspects.Autofac.Caching;
+using Core.Aspects.Autofac.Validation;
 using Core.Entity.Concrete;
 using Core.Utilities.ExceptionHandle;
 using Core.Utilities.Results.Abstract;
@@ -24,20 +29,23 @@ namespace Business.Concrete.Managers
             _customerService = customerService;
         }
 
+        [ValidationAspect(typeof(UserValidator), Priority = 4)]
+        [AuthAspect("admin",Priority = 5)]
+        [CacheRemoveAspect("IUserService.Get", Priority = 3)]
         public IResult Add(User user)
         {
-            _userDal.Add(user);
-            //var result = ExceptionHandler.HandleWithNoReturn(() => 
-            //{
-            //    _userDal.Add(user);
-            //});
-            //if(!result)
-            //{
-            //    return new ErrorResult("Beklenmedik bir hata çıktı.Lütfen daha sonra tekrar deneyiniz.");
-            //}
-            return new SuccessResult("İşlem başarılı");
+            var result = ExceptionHandler.HandleWithNoReturn(() =>
+            {
+                _userDal.Add(user);
+            });
+            if (!result)
+            {
+                return new ErrorResult(Messages.ErrorMessage);
+            }
+            return new SuccessResult(Messages.SuccessMessage);
         }
-
+        [AuthAspect("admin",Priority = 5)]
+        [CacheRemoveAspect("IUserService.Get", Priority = 3)]
         public IResult Delete(User user)
         {
             var result = ExceptionHandler.HandleWithNoReturn(() =>
@@ -45,17 +53,18 @@ namespace Business.Concrete.Managers
                 var listOfCustomers = _customerService.GetAll(c => c.UserId == user.Id).Data.Select(c => c.Id).ToList();
                 if(listOfCustomers.Count>0)
                 {
-                    throw new Exception("Bu kullanıcı aynı zamanda bir müşteri.Silme başarısız!");
+                    throw new Exception(Messages.ForeignKeyMessage);
                 }
                 _userDal.Delete(user);
             });
             if (!result)
             {
-                return new ErrorResult("Beklenmedik bir hata çıktı.Lütfen daha sonra tekrar deneyiniz.");
+                return new ErrorResult(Messages.ErrorMessage);
             }
-            return new SuccessResult("İşlem başarılı");
+            return new SuccessResult(Messages.SuccessMessage);
         }
-
+        [AuthAspect("admin",Priority = 5)]
+        [CacheAspect]
         public IDataResult<List<User>> GetAll(Expression<Func<User, bool>> filter = null)
         {
             var result = ExceptionHandler.HandleWithReturn<Expression<Func<User,bool>>, List<User>>((filter) =>
@@ -64,11 +73,12 @@ namespace Business.Concrete.Managers
              },filter);
             if(!result.Success)
             {
-                return new ErrorDataResult<List<User>>("Beklenmedik bir hata çıktı.Lütfen daha sonra tekrar deneyiniz.");
+                return new ErrorDataResult<List<User>>(Messages.ErrorMessage);
             }
-            return new SuccessDataResult<List<User>>(result.Data, "İşlem başarılı");
+            return new SuccessDataResult<List<User>>(result.Data, Messages.SuccessMessage);
         }
-
+        [AuthAspect("admin",Priority = 5)]
+        [CacheAspect]
         public IDataResult<User> GetByEmail(string email)
         {
             var result = ExceptionHandler.HandleWithReturn<string, User>((e) =>
@@ -77,11 +87,12 @@ namespace Business.Concrete.Managers
             }, email);
             if (!result.Success)
             {
-                return new ErrorDataResult<User>("Beklenmedik bir hata çıktı.Lütfen daha sonra tekrar deneyiniz.asdasdasdasd");
+                return new ErrorDataResult<User>(Messages.ErrorMessage);
             }
-            return new SuccessDataResult<User>(result.Data, "İşlem başarılı");
+            return new SuccessDataResult<User>(result.Data, Messages.SuccessMessage);
         }
-
+        [AuthAspect("admin",Priority = 5)]
+        [CacheAspect]
         public IDataResult<User> GetById(int userId)
         {
             var result = ExceptionHandler.HandleWithReturn<int,User>((userId) =>
@@ -90,11 +101,12 @@ namespace Business.Concrete.Managers
             },userId);
             if (!result.Success)
             {
-                return new ErrorDataResult<User>("Beklenmedik bir hata çıktı.Lütfen daha sonra tekrar deneyiniz.");
+                return new ErrorDataResult<User>(Messages.ErrorMessage);
             }
-            return new SuccessDataResult<User>(result.Data,"İşlem başarılı");
+            return new SuccessDataResult<User>(result.Data, Messages.SuccessMessage);
         }
-
+        [AuthAspect("admin",Priority = 5)]
+        [CacheAspect]
         public IDataResult<List<OperationClaim>> GetClaims(User user)
         {
             var result = ExceptionHandler.HandleWithReturn<User, List<OperationClaim>>((u) =>
@@ -103,11 +115,14 @@ namespace Business.Concrete.Managers
             }, user);
             if (!result.Success)
             {
-                return new ErrorDataResult<List<OperationClaim>>("Beklenmedik bir hata çıktı.Lütfen daha sonra tekrar deneyiniz.");
+                return new ErrorDataResult<List<OperationClaim>>(Messages.ErrorMessage);
             }
-            return new SuccessDataResult<List<OperationClaim>>(result.Data, "İşlem başarılı");
+            return new SuccessDataResult<List<OperationClaim>>(result.Data, Messages.SuccessMessage);
         }
 
+        [ValidationAspect(typeof(UserValidator), Priority = 4)]
+        [AuthAspect("admin",Priority = 5)]
+        [CacheRemoveAspect("IUserService.Get", Priority = 3)]
         public IResult Update(User user)
         {
             var result = ExceptionHandler.HandleWithNoReturn(() =>
@@ -116,9 +131,9 @@ namespace Business.Concrete.Managers
             });
             if (!result)
             {
-                return new ErrorResult("Beklenmedik bir hata çıktı.Lütfen daha sonra tekrar deneyiniz.");
+                return new ErrorResult(Messages.ErrorMessage);
             }
-            return new SuccessResult("İşlem başarılı");
+            return new SuccessResult(Messages.SuccessMessage);
         }
     }
 }

@@ -20,7 +20,7 @@ namespace WebAPI.Controllers
             _colorService = colorService;
         }
         [HttpGet("getall")]
-        [Authorize()]
+        //[Authorize()]
         public IActionResult GetAll()
         {
             var result = _colorService.GetColors();
@@ -30,7 +30,7 @@ namespace WebAPI.Controllers
             }
             return BadRequest(result.Message);
         }
-        [HttpPost]
+        [HttpPost("add")]
         public IActionResult Add(Color color)
         {
             var result = _colorService.Add(color);

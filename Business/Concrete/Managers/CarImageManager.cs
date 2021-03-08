@@ -1,4 +1,9 @@
 ﻿using Business.Abstract.Services;
+using Business.BusinessAspects.Autofac;
+using Business.Utilities.Messages.TurkishMessages;
+using Business.ValidationRules.FluentValidation;
+using Core.Aspects.Autofac.Caching;
+using Core.Aspects.Autofac.Validation;
 using Core.Utilities.BusinessRuleHandle;
 using Core.Utilities.ExceptionHandle;
 using Core.Utilities.Results.Abstract;
@@ -23,12 +28,15 @@ namespace Business.Concrete.Managers
             _carService = carService;
         }
 
+        [ValidationAspect(typeof(CarImageValidator), Priority = 4)]
+        [AuthAspect("admin",Priority = 5)]
+        [CacheRemoveAspect("ICarImageService.Get", Priority = 3)]
         public IResult Add(CarImage carImage)
         {
             var ruleResult = BusinessRuleHandler.CheckTheRules(CheckImageCount(carImage.CarId),CheckTheCarExist(carImage.CarId));
             if(ruleResult.Count>0)
             {
-                return new ErrorResult("İş kurallarına takıldı.");
+                return new ErrorResult(Messages.BusinessRuleError);
             }
             var result = ExceptionHandler.HandleWithNoReturn(() =>
             {
@@ -36,11 +44,13 @@ namespace Business.Concrete.Managers
             });
             if(!result)
             {
-                return new ErrorResult("Beklenmedik bir hata oluştu.Lütfen daha sonra tekrar deneyiniz.");
+                return new ErrorResult(Messages.ErrorMessage);
             }
-            return new SuccessResult("İşlem başarılı.");
+            return new SuccessResult(Messages.SuccessMessage);
         }
 
+        [AuthAspect("admin",Priority = 5)]
+        [CacheRemoveAspect("ICarImageService.Get", Priority = 3)]
         public IResult Delete(CarImage carImage)
         {
             var result = ExceptionHandler.HandleWithNoReturn(() =>
@@ -49,11 +59,12 @@ namespace Business.Concrete.Managers
             });
             if (!result)
             {
-                return new ErrorResult("Beklenmedik bir hata oluştu.Lütfen daha sonra tekrar deneyiniz.");
+                return new ErrorResult(Messages.ErrorMessage);
             }
-            return new SuccessResult("İşlem başarılı.");
+            return new SuccessResult(Messages.SuccessMessage);
         }
-
+        [AuthAspect("admin",Priority = 5)]
+        [CacheAspect]
         public IDataResult<List<CarImage>> GetAll(Expression<Func<CarImage, bool>> filter = null)
         {
             var result = ExceptionHandler.HandleWithReturn<Expression<Func<CarImage, bool>>, List<CarImage>>((x) =>
@@ -62,11 +73,14 @@ namespace Business.Concrete.Managers
             },filter);
             if(!result.Success)
             {
-                return new ErrorDataResult<List<CarImage>>("Beklenmedik bir hata oluştu.Lütfen daha sonra tekrar deneyiniz.");
+                return new ErrorDataResult<List<CarImage>>(Messages.ErrorMessage);
             }
-            return new SuccessDataResult<List<CarImage>>(result.Data, "İşlem başarılı.");
+            return new SuccessDataResult<List<CarImage>>(result.Data, Messages.SuccessMessage);
         }
 
+        [ValidationAspect(typeof(CarImageValidator), Priority = 4)]
+        [AuthAspect("admin",Priority = 5)]
+        [CacheRemoveAspect("ICarImageService.Get", Priority = 3)]
         public IResult Update(CarImage carImage)
         {
             var result = ExceptionHandler.HandleWithNoReturn(() =>
@@ -75,18 +89,18 @@ namespace Business.Concrete.Managers
             });
             if (!result)
             {
-                return new ErrorResult("Beklenmedik bir hata oluştu.Lütfen daha sonra tekrar deneyiniz.");
+                return new ErrorResult(Messages.ErrorMessage);
             }
-            return new SuccessResult("İşlem başarılı.");
+            return new SuccessResult(Messages.SuccessMessage);
         }
         private IResult CheckImageCount(int carId)
         {
             var images = _carImageDal.GetAll(x => x.CarId == carId);
             if(images.Count >= 5)
             {
-                return new ErrorResult("Arabanın en fazla 5 resmi olabilir.");
+                return new ErrorResult(Messages.CarImageCount);
             }
-            return new SuccessResult("Resim eklendi.");
+            return new SuccessResult(Messages.SuccessMessage);
         }
         private IResult CheckTheCarExist(int carId)
         {
@@ -95,7 +109,7 @@ namespace Business.Concrete.Managers
             {
                 return new ErrorResult("Araba bulunamadı");
             }
-            return new SuccessResult("Resim eklendi.");
+            return new SuccessResult(Messages.SuccessMessage);
         }
     }
 }

@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace WebAPI.Controllers
 {
-    [Route("api/[controller]/[action]")]
+    [Route("api/[controller]")]
     [ApiController]
     public class CarController : ControllerBase
     {
@@ -20,7 +20,7 @@ namespace WebAPI.Controllers
             _carService = carService;
         }
 
-        [HttpGet]
+        [HttpGet("getall")]
         public IActionResult GetAll()
         {
             var result = _carService.GetCars();
